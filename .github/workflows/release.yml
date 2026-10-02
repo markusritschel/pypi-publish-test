@@ -1,4 +1,4 @@
-name: Publish to TestPyPI
+name: Publish to TestPyPI and PyPI
 
 on:
   release:
@@ -16,7 +16,6 @@ jobs:
           name: dist
           path: dist/
 
-
   test-pypi:
     needs: build
     runs-on: ubuntu-latest
@@ -26,7 +25,6 @@ jobs:
       name: testpypi
       url: https://test.pypi.org/p/pypi-publish-test
     steps:
-      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: false
@@ -34,9 +32,8 @@ jobs:
         with:
           name: dist
           path: dist/
-      # - run: uv build
       - run: uv publish --publish-url https://test.pypi.org/legacy/
-    
+
   pypi:
     needs: test-pypi
     runs-on: ubuntu-latest
@@ -48,15 +45,12 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: false
-      # - run: uv build
       - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
       # Defaults to PyPI's upload endpoint (https://upload.pypi.org/legacy/).
       - run: uv publish
-
