@@ -5,7 +5,20 @@ on:
     types: [published]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: uv build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+
   test-pypi:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -13,14 +26,19 @@ jobs:
       name: testpypi
       url: https://test.pypi.org/p/pypi-publish-test
     steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v10.1.0
-        with:
-          enable-cache: false
-      - run: uv build
+      #   with:
+      #     enable-cache: false
+      # - run: uv build
       - run: uv publish --publish-url https://test.pypi.org/legacy/
     
   pypi:
+    needs: test-pypi
     runs-on: ubuntu-latest
     environment:
       # Add yourself as a required reviewer on this environment to approve
@@ -30,10 +48,14 @@ jobs:
     permissions:
       id-token: write
     steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v10.1.0
-        with:
-          enable-cache: false
-      - run: uv build
+      #   with:
+      #     enable-cache: false
+      # - run: uv build
       - run: uv publish --publish-url https://pypi.org/
 
