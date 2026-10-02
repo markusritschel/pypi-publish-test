@@ -57,5 +57,6 @@ jobs:
         with:
           name: dist
           path: dist/
-      - run: uv publish --publish-url https://pypi.org/
+      # Defaults to PyPI's upload endpoint (https://upload.pypi.org/legacy/).
+      - run: uv publish
 
